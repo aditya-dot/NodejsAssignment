@@ -20,7 +20,7 @@ function PostgresHelper() {
         client = new Client({
             host: 'localhost',
             user: 'postgres',
-            database: 'test',
+            database: 'social',
             password: '123',
             port: 5432,
         })
@@ -37,15 +37,13 @@ function PostgresHelper() {
 }
 
 PostgresHelper.prototype.ExecuteQuery = function (sSQLQuery, callback) {
-
+    console.log("sSQLQuery===================>", sSQLQuery);
     client.query(sSQLQuery, (err, res) => {
-        if (!err) {
-            //console.log(err, res)
-            // pool.end()
-            callback('true', res)
-            client.end()
-        } else {
+        if (err) {
             callback('DBerror', err)
+        } else {
+            callback('successful', res)
+            // client.end()
         }
 
     })
