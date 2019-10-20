@@ -101,7 +101,59 @@ router.put('/user/deleteuser', function (req, res) {
         res.status(401).send("AUTH FAIL")
     }
 
+})
+/*
+	GetALL data using Userid and emailid
+	@Method: POST
+	@Controller-Method: getall
+*/
+router.post('/user/getall', function (req, res) {
+    var authreturn = new auth().authuser(req)
+    var parameters = {
+        userid: req.body.userid,
+        email: req.body.email
+    }
+    if (authreturn) {
+        new controller().getall(req, parameters, function (returnvalue) {
+            res.json(returnvalue)
+        })
+    } else {
+        res.status(401).send("AUTH FAIL")
+    }
 
+    //  res.send('Hello ' + name)
+
+})
+
+/*
+	POST A TWEET
+	@Method: POST
+	@Controller-Method: posttweets
+*/
+router.post('/user/posttweets', function (req, res) {
+    var authreturn = new auth().authuser(req)
+    var parameters = {
+        userid: req.body.userid,
+        email: req.body.email,
+        post: req.body.post,
+        posttitle: req.body.posttitle
+    }
+    console.log("authreturn", authreturn);
+    if (authreturn) {
+        if (parameters.post === parameters.post.toLowerCase()) {
+            new controller().posttweets(req, parameters, function (response) {
+                var statuscode = response.status
+                res.status(statuscode).json(response)
+            })
+        } else {
+            res.status(400).json({
+                "returnmsg": "POST should not use CAPITAL letters"
+            })
+        }
+
+    } else {
+        res.status(401).send("AUTH FAIL")
+    }
 
 })
 
@@ -117,18 +169,5 @@ router.put('/user/deleteuser', function (req, res) {
 
 
 
-
-
-
-
-// router.get('/user/getall/:user', function (req, res) {
-//     console.log("req", req.params.user);
-//     //console.log("res", res);
-//     new controller().getall(req, function (returnvalue) {
-//         res.json(returnvalue)
-//     })
-//     //  res.send('Hello ' + name)
-
-// })
 
 module.exports = router

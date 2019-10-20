@@ -6,20 +6,19 @@ function controller() { }
 var SQLQuery = ''
 var ORetObject = {}
 
-controller.prototype.getall = function (req, callback) {
-    // console.log("hellllllllllllllllllllllllllo", req.params.user);
-    var name = req.params.user
-    //callback('done')
+/*User GetAll */
+controller.prototype.getall = function (req, oparameters, callback) {
+
     new Promise(function (resolve, reject) {
         try {
-            SQLQuery = "select * from test where name='" + name + "';"
+            SQLQuery = "select s.name, s.email,s.mobile,s.address,p.post,p.posttitle from socialuser s inner join post p on s.email = p.email where 1=1 and s.userid='" + oparameters.userid + "';"
             console.log("SQLQuery", SQLQuery);
             //return
             new postgres().ExecuteQuery(SQLQuery, function (returnmsg, returnvalue) {
                 if (returnmsg === 'successful') {
                     if (returnvalue.rows.length > 0) {
                         ORetObject.returnmsg = returnmsg
-                        ORetObject.returnvalue = returnvalue
+                        ORetObject.returnvalue = returnvalue.rows
                     } else {
                         ORetObject.returnmsg = 'NoRecordsFound';
                         ORetObject.returnvalue = [];
@@ -204,5 +203,37 @@ controller.prototype.delete = function (req, oparameters, callback) {
 }
 
 
+/* POST tweets*/
+controller.prototype.posttweets = function (req, oparameters, callback) {
+    new Promise(function (resolve, reject) {
+        try {
+            SQLQuery = "insert into post(userid,email,post,posttitle,created) values('" + oparameters.userid + "','" + oparameters.email + "','" + oparameters.post + "','" + oparameters.posttitle + "',NOW())"
+            //console.log("SQLQuery=========>", SQLQuery);
+            //return
+            new postgres().ExecuteQuery(SQLQuery, function (returnmsg, returnvalue) {
+                console.log("returnvalue", returnvalue);
+                if (returnmsg === 'successful') {
+                    ORetObject.returnmsg = 'tweet Succesfull'
+                    ORetObject.returnvalue = []
+                    ORetObject.status = 200
+                    resolve(ORetObject)
+                } else {
+                    ORetObject.returnmsg = 'error'
+                    ORetObject.returnvalue = []
+                    ORetObject.status = 500
+                    resolve(ORetObject)
+                }
+                //  console.log(returnmsg, returnvalue);
+            })
+        } catch (e) {
+            ORetObject.returnmsg = 'Exception';
+            ORetObject.returnvalue = e;
+            ORetObject.status = 500
+            resolve(ORetObject);
+        }
+    }).then(ORetObject => {
+        callback(ORetObject)
+    })
+}
 
 
