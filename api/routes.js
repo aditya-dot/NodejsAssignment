@@ -29,7 +29,6 @@ router.post('/user/signup', function (req, res) {
             "returnvalue": response.returnvalue,
             "status": response.status
         })
-        //res.json(returnvalue)
     })
 })
 /*
@@ -43,7 +42,6 @@ router.post('/user/login', function (req, res) {
         password: req.body.password
     }
     new controller().login(req, parameters, function (response) {
-        console.log("response", response);
         var statuscode = response.status
         res.status(statuscode).json(response)
     })
@@ -55,9 +53,6 @@ router.post('/user/login', function (req, res) {
 	@Controller-Method: adddetails
 */
 router.put('/user/adddetails', function (req, res) {
-    console.log(req.headers);
-    //res.json('true')
-    //var authentication = req.headers.x - access - token
     var authreturn = new auth().authuser(req)
     var parameters = {
         userid: req.body.userid,
@@ -66,9 +61,7 @@ router.put('/user/adddetails', function (req, res) {
         mobile: req.body.mobile,
         address: req.body.address
     }
-    console.log("authreturn", authreturn);
     if (authreturn) {
-        console.log("go ahead");
         new controller().adddetails(req, parameters, function (response) {
             var statuscode = response.status
             res.status(statuscode).json(response)
@@ -79,29 +72,38 @@ router.put('/user/adddetails', function (req, res) {
     }
 })
 
+
 /*
-	Delete User by requsted Id
-	@Method: PUT
-	@Controller-Method: delete
+	POST A TWEET
+	@Method: POST
+	@Controller-Method: posttweets
 */
-router.put('/user/deleteuser', function (req, res) {
-    //console.log(req.headers);
+router.post('/user/posttweets', function (req, res) {
     var authreturn = new auth().authuser(req)
     var parameters = {
-        //userid: req.body.userid,
-        email: req.body.email
+        userid: req.body.userid,
+        email: req.body.email,
+        post: req.body.post,
+        posttitle: req.body.posttitle
     }
-    console.log("authreturn", authreturn);
     if (authreturn) {
-        new controller().delete(req, parameters, function (response) {
-            var statuscode = response.status
-            res.status(statuscode).json(response)
-        })
+        if (parameters.post === parameters.post.toLowerCase()) {
+            new controller().posttweets(req, parameters, function (response) {
+                var statuscode = response.status
+                res.status(statuscode).json(response)
+            })
+        } else {
+            res.status(400).json({
+                "returnmsg": "POST should not use CAPITAL letters"
+            })
+        }
+
     } else {
         res.status(401).send("AUTH FAIL")
     }
 
 })
+
 /*
 	GetALL data using Userid and emailid
 	@Method: POST
@@ -121,53 +123,52 @@ router.post('/user/getall', function (req, res) {
         res.status(401).send("AUTH FAIL")
     }
 
-    //  res.send('Hello ' + name)
-
 })
 
 /*
-	POST A TWEET
+	LOGOUT
 	@Method: POST
-	@Controller-Method: posttweets
+	@Controller-Method: logout
 */
-router.post('/user/posttweets', function (req, res) {
+router.post('/user/logout', function (req, res) {
     var authreturn = new auth().authuser(req)
     var parameters = {
-        userid: req.body.userid,
-        email: req.body.email,
-        post: req.body.post,
-        posttitle: req.body.posttitle
+        email: req.body.email
     }
-    console.log("authreturn", authreturn);
     if (authreturn) {
-        if (parameters.post === parameters.post.toLowerCase()) {
-            new controller().posttweets(req, parameters, function (response) {
-                var statuscode = response.status
-                res.status(statuscode).json(response)
+        new controller().logout(req, parameters, function (response) {
+            res.status(200).json({
+                returnmsg: "User Logout Succcessfully",
+                token: response,
+                status: 200
             })
-        } else {
-            res.status(400).json({
-                "returnmsg": "POST should not use CAPITAL letters"
-            })
-        }
-
+        })
     } else {
         res.status(401).send("AUTH FAIL")
     }
 
 })
 
+/*
+	Delete User by requsted Id
+	@Method: PUT
+	@Controller-Method: delete
+*/
 
+router.put('/user/deleteuser', function (req, res) {
+    var authreturn = new auth().authuser(req)
+    var parameters = {
+        email: req.body.email
+    }
+    if (authreturn) {
+        new controller().delete(req, parameters, function (response) {
+            var statuscode = response.status
+            res.status(statuscode).json(response)
+        })
+    } else {
+        res.status(401).send("AUTH FAIL")
+    }
 
-
-
-
-
-
-
-
-
-
-
+})
 
 module.exports = router
